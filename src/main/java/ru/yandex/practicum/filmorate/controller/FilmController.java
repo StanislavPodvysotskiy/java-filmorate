@@ -13,30 +13,38 @@ import java.util.*;
 @RequestMapping(value = "/films")
 public class FilmController {
 
-    private final List<Film> films = new ArrayList<>();
+    private int id = 1;
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
     public Collection<Film> getAll() {
-        return films;
+        return films.values();
     }
 
     @PostMapping
     public Film add(@RequestBody Film film) {
-        if (films.contains(film)) {
+        log.info("Получена запрос на добавление фильма");
+        if (films.containsKey(film.getId())) {
             throw new ValidationException("Такой фильм уже есть");
         }
         FilmValidator.validate(film);
-        films.add(film);
+        if (film.getId() == null) {
+            film.setId(id);
+            id++;
+        }
+        films.put(film.getId(), film);
+        log.info("Фильм добавлен");
         return film;
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
-        if (films.contains(film)) {
-            FilmValidator.validate(film);
-            films.remove(film);
+        log.info("Получена запрос на обновление фильма");
+        if (!films.containsKey(film.getId())) {
+            throw new ValidationException("Такого фильма нет");
         }
-        films.add(film);
+        films.put(film.getId(), film);
+        log.info("Фильм обновлен");
         return film;
     }
 

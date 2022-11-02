@@ -4,13 +4,12 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 
 @Data
 public class User {
 
-    private int id = 1;
+    private Integer id;
     private String email;
     private String login;
     private String name;

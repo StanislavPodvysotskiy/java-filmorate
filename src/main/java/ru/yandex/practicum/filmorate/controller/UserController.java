@@ -14,7 +14,6 @@ import java.util.*;
 public class UserController {
 
     private int id = 1;
-
     private final Map<Integer, User> users = new HashMap<>();
 
     @GetMapping
@@ -24,26 +23,30 @@ public class UserController {
 
     @PostMapping
     public User add(@RequestBody User user) {
-        if(users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с таким e-mail адресом уже есть");
+        log.info("Получена запрос на добавление пользователя");
+        if (users.containsKey(user.getId())) {
+            throw new ValidationException("Пользователь с таким ID уже есть");
         }
-        return validateId(user);
+        UserValidator.validate(user);
+        if (user.getId() == null) {
+            user.setId(id);
+            id++;
+        }
+        users.put(user.getId(), user);
+        log.info("Пользователь добавлен");
+        return user;
     }
 
     @PutMapping
     public User update(@RequestBody User user) {
-        return validateId(user);
-    }
-
-    private User validateId(@RequestBody User user) {
-        if (user.getId() == -1) {
-            while (users.containsKey(id)) {
-                id++;
-            }
-            user.setId(id++);
+        log.info("Получена запрос на обновление пользователя");
+        if (!users.containsKey(user.getId())) {
+            throw new ValidationException("Пользователь с таким ID не найден");
         }
         UserValidator.validate(user);
         users.put(user.getId(), user);
+        log.info("Пользователь обновлен");
         return user;
     }
+
 }

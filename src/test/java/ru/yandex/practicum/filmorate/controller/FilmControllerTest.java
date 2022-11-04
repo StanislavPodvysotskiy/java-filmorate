@@ -1,198 +1,126 @@
-/*
 package ru.yandex.practicum.filmorate.controller;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.model.Film;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
 
-    private static final HttpClient CLIENT = HttpClient.newHttpClient();
+    private FilmController filmController;
 
-    @BeforeAll
-    public static void beforeAll() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"1\",\n" +
-                "\t\"name\": \"name\",\n" +
-                "\t\"description\": \"123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-\",\n" +
-                "\t\"releaseDate\": \"1895-12-28\",\n" +
-                "\t\"duration\": \"0\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.statusCode());
+    @BeforeEach
+    public void beforeEach() {
+        filmController = new FilmController();
     }
 
     @Test
-    public void shouldCode500IfSameIdAdd() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"1\",\n" +
-                "\t\"name\": \"name\",\n" +
-                "\t\"description\": \"123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-\",\n" +
-                "\t\"releaseDate\": \"1895-12-28\",\n" +
-                "\t\"duration\": \"0\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldAddNewFilm() {
+        Film film = new Film(1,
+                "name",
+                "123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
+                        "123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
+                        "123456789-123456789-123456789-123456789-123456789-123456789-",
+                LocalDate.of(1895, 12, 28),
+                0);
+        filmController.add(film);
+        Collection<Film> films = filmController.getAll();
+        assertEquals(1, films.size());
     }
 
     @Test
-    public void shouldBeCode500WhenNameIsBlank() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"2\",\n" +
-                "\t\"name\": \"\",\n" +
-                "\t\"description\": \"Description\",\n" +
-                "\t\"releaseDate\": \"1980-03-25\",\n" +
-                "\t\"duration\": \"200\"\n" +
-            "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldBeExceptionWhenSameIdAdd() {
+        Film film1 = new Film(1, "name1", "description1",
+                LocalDate.of(1985, 12, 28), 1);
+        Film film2 = new Film(1, "name2", "description2",
+                LocalDate.of(1995, 12, 28), 2);
+        filmController.add(film1);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.add(film2);
+        });
+        String message = exception.getMessage();
+        assertEquals("Такой фильм уже есть", message);
     }
 
     @Test
-    public void shouldBeCode500WhenDescriptionLengthMoreThan200() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"2\",\n" +
-                "\t\"name\": \"name\",\n" +
-                "\t\"description\": \"123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
-                "123456789-123456789-123456789-123456789-1\",\n" +
-                "\t\"releaseDate\": \"1980-03-25\",\n" +
-                "\t\"duration\": \"200\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldBeExceptionWhenNameIsBlank() {
+        Film film = new Film(1, " ", "description",
+                LocalDate.of(19855, 12, 28), 1);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.add(film);
+        });
+        String message = exception.getMessage();
+        assertEquals("Название не может быть пустым", message);
     }
 
     @Test
-    public void shouldBeCode500WhenYearBefore1895() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"2\",\n" +
-                "\t\"name\": \"name\",\n" +
-                "\t\"description\": \"Description\",\n" +
-                "\t\"releaseDate\": \"1894-03-25\",\n" +
-                "\t\"duration\": \"200\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldBeExceptionWhenDescriptionLengthMoreThan200() {
+        Film film = new Film(1,
+                "name",
+                "123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
+                        "123456789-123456789-123456789-123456789-123456789-123456789-123456789-" +
+                        "123456789-123456789-123456789-123456789-123456789-123456789-1",
+                LocalDate.of(1985, 12, 28),
+                1);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.add(film);
+        });
+        String message = exception.getMessage();
+        assertEquals("Описание больше 200 символов", message);
     }
 
     @Test
-    public void shouldBeError500WhenDurationNegative() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"2\",\n" +
-                "\t\"name\": \"name\",\n" +
-                "\t\"description\": \"Description\",\n" +
-                "\t\"releaseDate\": \"1980-03-25\",\n" +
-                "\t\"duration\": \"-200\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .POST(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldBeExceptionWhenYearBefore1895() {
+        Film film = new Film(1, "name", "description",
+                LocalDate.of(1894, 12, 28), 1);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.add(film);
+        });
+        String message = exception.getMessage();
+        assertEquals("Дата релиза — раньше 28 декабря 1895 года", message);
     }
 
     @Test
-    public void shouldUpdateFilm() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"1\",\n" +
-                "\t\"name\": \"updateName\",\n" +
-                "\t\"description\": \"updateDescription\",\n" +
-                "\t\"releaseDate\": \"1980-03-25\",\n" +
-                "\t\"duration\": \"200\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .PUT(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        JsonElement jsonElement = JsonParser.parseString(response.body());
-        JsonObject jsonObject = jsonElement.getAsJsonObject();
-        String name = jsonObject.get("name").getAsString();
-        assertEquals(200, responseCode);
-        assertEquals("updateName", name);
+    public void shouldBeExceptionWhenDurationNegative() {
+        Film film = new Film(1, "name", "description",
+                LocalDate.of(1985, 12, 28), -1);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.add(film);
+        });
+        String message = exception.getMessage();
+        assertEquals("Продолжительность фильма должна быть положительной", message);
     }
 
     @Test
-    public void shouldBeCode500WhenIdNotFound() throws IOException, InterruptedException {
-        URI url = URI.create("http://localhost:8080/films");
-        String json = "{\n" +
-                "\t\"id\": \"2\",\n" +
-                "\t\"name\": \"updateName\",\n" +
-                "\t\"description\": \"updateDescription\",\n" +
-                "\t\"releaseDate\": \"1980-03-25\",\n" +
-                "\t\"duration\": \"200\"\n" +
-                "}";
-        final HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(url)
-                .header("Content-Type", "application/json")
-                .PUT(body)
-                .build();
-        HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-        int responseCode = response.statusCode();
-        assertEquals(500, responseCode);
+    public void shouldUpdateFilm() {
+        Film film = new Film(1, "name", "description",
+                LocalDate.of(1985, 12, 28), 1);
+        filmController.add(film);
+        Film updateFilm = new Film(1, "updateName", "updateDescription",
+                LocalDate.of(1995, 12, 28), 2);
+        filmController.update(updateFilm);
+        List<Film> films = new ArrayList<>(filmController.getAll());
+        assertEquals("updateName", films.get(0).getName());
     }
-}*/
+
+    @Test
+    public void shouldBeExceptionWhenIdNotFound() {
+        Film film = new Film(1, "name", "description",
+                LocalDate.of(1985, 12, 28), 1);
+        filmController.add(film);
+        Film updateFilm = new Film(2, "updateName", "updateDescription",
+                LocalDate.of(1995, 12, 28), 2);
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            filmController.update(updateFilm);
+        });
+        String message = exception.getMessage();
+        assertEquals("Такого фильма нет", message);
+    }
+
+}

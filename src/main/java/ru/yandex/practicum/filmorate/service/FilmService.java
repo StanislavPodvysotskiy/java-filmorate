@@ -72,11 +72,6 @@ public class FilmService {
                 .sorted(Comparator.comparing(Film::getRate).reversed()).limit(count).collect(Collectors.toList());
     }
 
-    /*public List<Film> getPopular(int count) {
-        return likeStorage.getLikesMap().keySet().stream().sorted(Comparator.comparing(film -> likeStorage.getLikesMap()
-                .get(film).size()).reversed()).limit(count).collect(Collectors.toList());
-    }*/
-
     private Film makeFilm(int filmId) {
         Film film = filmStorage.getFilms().get(filmId);
         if (film == null) {

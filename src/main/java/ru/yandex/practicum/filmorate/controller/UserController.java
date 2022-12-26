@@ -23,14 +23,13 @@ public class UserController {
     @GetMapping
     public Collection<User> getAll() {
         log.info("Получен запрос всех пользователей");
-        return userService.getAll().values();
+        return userService.getAll();
     }
 
     @PostMapping
     public User add(@RequestBody User user) {
         log.info("Получена запрос на добавление пользователя");
-        userService.add(user);
-        return user;
+        return userService.add(user);
     }
 
     @PutMapping
@@ -47,17 +46,16 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public User addFriend(@PathVariable int id, @PathVariable int friendId) {
-        User user = userService.addFried(id, friendId);
-        return user;
+        return userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public Collection<User> removeFried(@PathVariable int id, @PathVariable int friendId) {
-        return userService.removeFried(id, friendId);
+        return userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Set<User> getAllFriends(@PathVariable int id) {
+    public List<User> getAllFriends(@PathVariable int id) {
         log.info("Заброшены все друзья пользоватенля с ID {}", id);
         return userService.getAllFriends(id);
     }

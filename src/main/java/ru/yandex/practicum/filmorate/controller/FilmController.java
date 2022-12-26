@@ -35,15 +35,14 @@ public class FilmController {
     @PostMapping
     public Film add(@RequestBody Film film) {
         log.info("Получена запрос на добавление фильма");
-        filmService.add(film);
-        return film;
+        log.info(film.getDescription());
+        return filmService.add(film);
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
         log.info("Получена запрос на обновление фильма");
-        filmService.update(film);
-        return film;
+        return filmService.update(film);
     }
 
     @PutMapping("/{id}/like/{userId}")

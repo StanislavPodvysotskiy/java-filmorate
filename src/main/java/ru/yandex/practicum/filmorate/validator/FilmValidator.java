@@ -3,8 +3,13 @@ package ru.yandex.practicum.filmorate.validator;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class FilmValidator {
@@ -14,6 +19,7 @@ public class FilmValidator {
         validateDescription(film);
         validateReleaseDate(film);
         validateDuration(film);
+        genreDuplicateValidation(film);
     }
 
     private static void validateName(Film film) {
@@ -41,6 +47,14 @@ public class FilmValidator {
         if (film.getDuration() < 0) {
             log.info("Неверное значение поля duration");
             throw new ValidationException("Продолжительность фильма должна быть положительной");
+        }
+    }
+
+    private static void genreDuplicateValidation(Film film) {
+        if (film.getGenres() != null) {
+            Set<Genre> duplicates = new HashSet<>(film.getGenres());
+            List<Genre> genres = new ArrayList<>(duplicates);
+            film.setGenres(genres);
         }
     }
 }

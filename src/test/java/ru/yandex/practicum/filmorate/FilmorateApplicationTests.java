@@ -1,21 +1,23 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.buf.Utf8Encoder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import ru.yandex.practicum.filmorate.dao.FilmStorageDB;
-import ru.yandex.practicum.filmorate.dao.UserStorageDB;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -29,9 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FilmoRateApplicationTests {
-	/*private UserStorage userStorage;
-	private FilmStorage filmStorage;
-	private final JdbcTemplate jdbcTemplate;
+	/*private final UserStorage userStorage;
+	private final FilmStorage filmStorage;
+    private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
 
 	private User user;
 	private User friend;
@@ -39,8 +44,6 @@ class FilmoRateApplicationTests {
 
 	@BeforeAll
 	public void beforeAll() {
-		userStorage = new UserStorageDB(jdbcTemplate);
-		filmStorage = new FilmStorageDB(jdbcTemplate);
 		user = new User();
 		user.setName("Name");
 		user.setLogin("Login");
@@ -93,8 +96,8 @@ class FilmoRateApplicationTests {
 	public void shouldAddFriend() {
 		user = userStorage.getUserById(1);
 		friend = userStorage.getUserById(2);
-		userStorage.addFriend(user.getId(), friend.getId());
-		List<User> friends = userStorage.getAllFriends(user.getId());
+        friendStorage.addFriend(user.getId(), friend.getId());
+		List<User> friends = friendStorage.getAllFriends(user.getId());
 		assertEquals(1, friends.size());
 	}
 
@@ -107,9 +110,9 @@ class FilmoRateApplicationTests {
 		oneMoreUser.setBirthday(LocalDate.of(1971, 11, 23));
 		oneMoreUser = userStorage.add(oneMoreUser);
 		friend = userStorage.getUserById(2);
-		userStorage.addFriend(oneMoreUser.getId(), friend.getId());
-		userStorage.removeFriend(oneMoreUser.getId(), friend.getId());
-		List<User> friends = userStorage.getAllFriends(oneMoreUser.getId());
+        friendStorage.addFriend(oneMoreUser.getId(), friend.getId());
+        friendStorage.removeFriend(oneMoreUser.getId(), friend.getId());
+		List<User> friends = friendStorage.getAllFriends(oneMoreUser.getId());
 		assertEquals(0, friends.size());
 	}
 
@@ -123,9 +126,9 @@ class FilmoRateApplicationTests {
 		commonFriend.setEmail("commonFriend@mail.ru");
 		commonFriend.setBirthday(LocalDate.of(1981, 12, 12));
 		commonFriend = userStorage.add(commonFriend);
-		userStorage.addFriend(user.getId(), commonFriend.getId());
-		userStorage.addFriend(friend.getId(), commonFriend.getId());
-		List<User> commonFriends = userStorage.getCommonFriends(user.getId(), friend.getId());
+        friendStorage.addFriend(user.getId(), commonFriend.getId());
+        friendStorage.addFriend(friend.getId(), commonFriend.getId());
+		List<User> commonFriends = friendStorage.getCommonFriends(user.getId(), friend.getId());
 		assertEquals(1, commonFriends.size());
 	}
 
@@ -156,35 +159,35 @@ class FilmoRateApplicationTests {
 	@Test
 	public void shouldBeRate5Than4() {
 		film = filmStorage.getFilmById(1);
-		filmStorage.addLike(1, 1);
+        likeStorage.addLike(1, 1);
 		film = filmStorage.getFilmById(1);
 		assertEquals(5, film.getRate());
-		filmStorage.removeLike(1,1);
+        likeStorage.removeLike(1,1);
 		film = filmStorage.getFilmById(1);
 		assertEquals(4, film.getRate());
 	}
 
 	@Test
 	public void shouldBeMpaListSize5() {
-		List<Mpa> mpa = new ArrayList<>(filmStorage.getAllMpa());
+		List<Mpa> mpa = new ArrayList<>(mpaStorage.getAllMpa());
 		assertEquals(5, mpa.size());
 	}
 
 	@Test
 	public void shouldBeMpaNameG() {
-		Mpa mpa = filmStorage.getMpaById(1);
+		Mpa mpa = mpaStorage.getMpaById(1);
 		assertEquals("G", mpa.getName());
 	}
 
 	@Test
 	public void shouldBeGenreListSize6() {
-		List<Genre> genres = new ArrayList<>(filmStorage.getAllGenres());
+		List<Genre> genres = new ArrayList<>(genreStorage.getAllGenres());
 		assertEquals(6, genres.size());
 	}
 
 	@Test
 	public void shouldBeGenreNameComedy() {
-		Genre genre = filmStorage.getGenreById(1);
+		Genre genre = genreStorage.getGenreById(1);
 		assertEquals("Комедия", genre.getName());
 	}*/
 

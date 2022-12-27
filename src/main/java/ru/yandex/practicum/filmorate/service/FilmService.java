@@ -1,27 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
 
-    FilmStorage filmStorage;
-
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage, LikeStorage likeStorage) {
-        this.filmStorage = filmStorage;
-    }
+    private final FilmStorage filmStorage;
+    private final LikeStorage likeStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
 
     public Collection<Film> getAll() {
         return filmStorage.getFilms();
@@ -42,31 +41,31 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        filmStorage.addLike(filmId, userId);
+        likeStorage.addLike(filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
-        filmStorage.removeLike(filmId, userId);
+        likeStorage.removeLike(filmId, userId);
     }
 
     public List<Film> getPopular(int count) {
-        return filmStorage.getPopular(count);
+        return likeStorage.getPopular(count);
     }
 
     public List<Mpa> getAllMpa() {
-        return filmStorage.getAllMpa();
+        return mpaStorage.getAllMpa();
     }
 
     public Mpa getMpaById(int id) {
-        return filmStorage.getMpaById(id);
+        return mpaStorage.getMpaById(id);
     }
 
     public List<Genre> getAllGenres() {
-        return filmStorage.getAllGenres();
+        return genreStorage.getAllGenres();
     }
 
     public Genre getGenreById(int id) {
-        return filmStorage.getGenreById(id);
+        return genreStorage.getGenreById(id);
     }
 
 }

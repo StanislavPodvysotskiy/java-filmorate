@@ -1,8 +1,8 @@
 create table if not exists USERS
 (
     USER_ID  INTEGER auto_increment,
-    EMAIL CHARACTER VARYING(50) not null,
-    LOGIN      CHARACTER VARYING(25) not null,
+    EMAIL CHARACTER VARYING(50) not null unique,
+    LOGIN      CHARACTER VARYING(25) not null unique,
     NAME  CHARACTER VARYING(25) not null,
     BIRTHDAY   DATE                  not null,
     constraint USERS_PK
@@ -44,6 +44,8 @@ create table if not exists FILM_GENRE
 (
     FILM  INTEGER,
     GENRE INTEGER,
+    constraint FILM_GENRE_PK
+        primary key (FILM, GENRE),
     constraint FILM_GENRE_FILMS_FK
         foreign key (FILM) references FILMS,
     constraint FILM_GENRE_GENRE_FK
@@ -54,6 +56,8 @@ create table if not exists FILM_LIKES
 (
     FILM_ID INTEGER not null,
     USER_ID INTEGER not null,
+    constraint FILM_LIKES_PK
+        primary key (FILM_ID, USER_ID),
     constraint LIKES_FILM_ID_FK
         foreign key (FILM_ID) references FILMS,
     constraint LIKES_USER_ID_FK
@@ -63,7 +67,9 @@ create table if not exists FILM_LIKES
 create table if not exists FRIENDS
 (
     USER_ID   INTEGER not null,
-    FRIEND_ID INTEGER,
+    FRIEND_ID INTEGER not null,
+    constraint FRIENDS_PK
+        primary key (USER_ID, FRIEND_ID),
     constraint FRIENDS_FRIEND_ID_FK
         foreign key (USER_ID) references USERS,
     constraint FRIENDS_USER_ID_FK

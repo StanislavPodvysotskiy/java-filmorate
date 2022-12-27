@@ -1,25 +1,20 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage, FriendStorage friendStorage) {
-        this.userStorage = userStorage;
-    }
+    private final FriendStorage friendStorage;
 
     public Collection<User> getAll() {
         return userStorage.getUsers();
@@ -40,19 +35,19 @@ public class UserService {
     }
 
     public List<User> getAllFriends(int id) {
-        return userStorage.getAllFriends(id);
+        return friendStorage.getAllFriends(id);
     }
 
     public User addFriend(int userId, int friendId) {
-        return userStorage.addFriend(userId, friendId);
+        return friendStorage.addFriend(userId, friendId);
     }
 
     public List<User> removeFriend(int userId, int friendId) {
-        return userStorage.removeFriend(userId, friendId);
+        return friendStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(int userId, int friendId) {
-        return userStorage.getCommonFriends(userId, friendId);
+        return friendStorage.getCommonFriends(userId, friendId);
     }
 
 }

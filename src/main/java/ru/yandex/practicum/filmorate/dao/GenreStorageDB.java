@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class GenreDB implements GenreStorage {
+public class GenreStorageDB implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
 

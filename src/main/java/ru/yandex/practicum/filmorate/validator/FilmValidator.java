@@ -30,6 +30,10 @@ public class FilmValidator {
     }
 
     private static void validateDescription(Film film) {
+        if (film.getDescription() == null) {
+            log.info("Поле description не установлено");
+            throw new ValidationException("Поле description не установлено");
+        }
         if (film.getDescription().length() > 200) {
             log.info("Поле description болше 200 символов");
             throw new ValidationException("Описание больше 200 символов");
@@ -37,13 +41,18 @@ public class FilmValidator {
     }
 
     private static void validateReleaseDate(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28)) ||
+                film.getReleaseDate() == null) {
             log.info("Неверное значение поля releaseDate");
             throw new ValidationException("Дата релиза — раньше 28 декабря 1895 года");
         }
     }
 
     private static void validateDuration(Film film) {
+        if (film.getDuration() == null) {
+            log.info("Поле duration не установлено");
+            throw new ValidationException("Поле duration не установлено");
+        }
         if (film.getDuration() < 0) {
             log.info("Неверное значение поля duration");
             throw new ValidationException("Продолжительность фильма должна быть положительной");

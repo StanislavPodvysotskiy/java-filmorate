@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -16,11 +14,8 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
-@Qualifier
 @Component
-@Primary
 @RequiredArgsConstructor
 public class FilmStorageDB implements FilmStorage {
 
@@ -45,9 +40,6 @@ public class FilmStorageDB implements FilmStorage {
 
     @Override
     public Film add(Film film) {
-        if (film.getId() != null) {
-            filmCheck(film.getId());
-        }
         String sql = "INSERT INTO FILMS (NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, MPA_ID) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(),
@@ -55,10 +47,7 @@ public class FilmStorageDB implements FilmStorage {
         int id = jdbcTemplate.query("SELECT * FROM FILMS WHERE NAME = ?", new Object[]{film.getName()},
                 new AddFilmMapper()).get(0).getId();
         updateFilmGenre(film, id);
-        String filmRequest = "SELECT * FROM FILMS AS F LEFT OUTER JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
-                "LEFT OUTER JOIN FILM_GENRE AS FG ON F.FILM_ID = FG.FILM " +
-                "LEFT OUTER JOIN GENRE AS G ON FG.GENRE = G.GENRE_ID WHERE FILM_ID = ?";
-        return jdbcTemplate.queryForObject(filmRequest, new Object[]{id}, new FilmMapper());
+        return getFilmById(id);
     }
 
     @Override
@@ -68,11 +57,9 @@ public class FilmStorageDB implements FilmStorage {
                 "RATE = ?, MPA_ID = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getRate(), film.getMpa().getId(), film.getId());
+        removeFilmGenres(film.getId());
         updateFilmGenre(film, film.getId());
-        String filmRequest = "SELECT * FROM FILMS AS F LEFT OUTER JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
-                "LEFT OUTER JOIN FILM_GENRE AS FG ON F.FILM_ID = FG.FILM " +
-                "LEFT OUTER JOIN GENRE AS G ON FG.GENRE = G.GENRE_ID WHERE FILM_ID = ?";
-        return jdbcTemplate.queryForObject(filmRequest, new Object[]{film.getId()}, new FilmMapper());
+        return getFilmById(film.getId());
     }
 
     private void filmCheck(int filmId) {
@@ -83,15 +70,13 @@ public class FilmStorageDB implements FilmStorage {
         }
     }
 
-    private void updateFilmGenre (Film film, int id) {
-        if (film.getGenres().isEmpty()) {
-            String removeFilmGenre = "DELETE FROM FILM_GENRE WHERE FILM = ?";
-            jdbcTemplate.update(removeFilmGenre, film.getId());
-        } else {
-            if (film.getId() != null) {
-                String removeFilmGenre = "DELETE FROM FILM_GENRE WHERE FILM = ?";
-                jdbcTemplate.update(removeFilmGenre, film.getId());
-            }
+    private void removeFilmGenres(int id) {
+        String removeFilmGenre = "DELETE FROM FILM_GENRE WHERE FILM = ?";
+        jdbcTemplate.update(removeFilmGenre, id);
+    }
+
+    private void updateFilmGenre(Film film, int id) {
+        if (film.getGenres() != null) {
             String addFilmGenre = "INSERT INTO FILM_GENRE (FILM, GENRE) VALUES (?, ?)";
             jdbcTemplate.batchUpdate(addFilmGenre, new BatchPreparedStatementSetter() {
                 @Override

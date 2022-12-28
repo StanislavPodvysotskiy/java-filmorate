@@ -61,4 +61,9 @@ public class LikeStorageDB implements LikeStorage {
         }
     }
 
+    private void updateRate(long filmId) {
+        String sqlQuery = "update FILMS f set rate = (select count(l.user_id) from FILM_LIKES l where l.film_id = f.film_id)  where film_id = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
+    }
+
 }

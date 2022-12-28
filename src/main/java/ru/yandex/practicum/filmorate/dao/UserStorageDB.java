@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -12,16 +11,11 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
-@Qualifier
 @Component
-@Primary
+@RequiredArgsConstructor
 public class UserStorageDB implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserStorageDB(JdbcTemplate jdbcTemplate){
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Collection<User> getUsers() {
@@ -31,15 +25,11 @@ public class UserStorageDB implements UserStorage {
 
     @Override
     public User add(User user) {
-        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM USERS WHERE USER_ID = ?", user.getId());
-        if (rs.next()) {
-            throw new NotFoundException("User already exist");
-        }
         String sql = "insert into USERS (EMAIL, LOGIN, NAME, BIRTHDAY) " +
                 "VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
         String returnUser = "select * from USERS where EMAIL = ?";
-        return jdbcTemplate.query(returnUser, new Object[]{user.getEmail()}, new UserMapper()).get(0);
+        return jdbcTemplate.queryForObject(returnUser, new Object[]{user.getEmail()}, new UserMapper());
     }
 
     @Override
@@ -48,7 +38,7 @@ public class UserStorageDB implements UserStorage {
         String sql = "update USERS SET EMAIL = ?, LOGIN = ?, NAME = ?, BIRTHDAY = ? WHERE USER_ID = ?";
         jdbcTemplate.update(sql, user.getEmail(), user.getLogin(), user.getName(), user.getBirthday(), user.getId());
         String returnUser = "select * from USERS where EMAIL = ?";
-        return jdbcTemplate.query(returnUser, new Object[]{user.getEmail()}, new UserMapper()).get(0);
+        return jdbcTemplate.queryForObject(returnUser, new Object[]{user.getEmail()}, new UserMapper());
     }
 
     @Override

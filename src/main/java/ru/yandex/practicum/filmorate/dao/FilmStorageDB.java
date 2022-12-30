@@ -74,7 +74,7 @@ public class FilmStorageDB implements FilmStorage {
             stmt.setString(2, film.getDescription());
             stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
             stmt.setInt(4, film.getDuration());
-            stmt.setInt(5, film.getRate());
+            stmt.setInt(5, 0);
             stmt.setInt(6, film.getMpa().getId());
             return stmt;
         }, keyHolder);
@@ -87,9 +87,9 @@ public class FilmStorageDB implements FilmStorage {
     public Film update(Film film) {
         filmCheck(film.getId());
         String sql = "UPDATE FILMS SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ?, " +
-                "RATE = ?, MPA_ID = ? WHERE FILM_ID = ?";
+                "MPA_ID = ? WHERE FILM_ID = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
-                film.getRate(), film.getMpa().getId(), film.getId());
+                film.getMpa().getId(), film.getId());
         removeFilmGenres(film.getId());
         updateFilmGenre(film, film.getId());
         return getFilmById(film.getId());

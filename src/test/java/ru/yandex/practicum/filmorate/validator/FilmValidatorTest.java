@@ -12,7 +12,7 @@ class FilmValidatorTest {
     @Test
     public void shouldBeExceptionWhenNameIsBlank() {
         Film film = new Film(1, " ", "description",
-                LocalDate.of(19855, 12, 28), 1, 0);
+                LocalDate.of(1985, 12, 28), 1, 0);
         Exception exception = assertThrows(RuntimeException.class, () -> {
             FilmValidator.validate(film);;
         });

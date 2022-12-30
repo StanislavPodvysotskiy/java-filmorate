@@ -160,10 +160,10 @@ class FilmoRateApplicationTests {
 		film = filmStorage.getFilmById(1);
         likeStorage.addLike(1, 1);
 		film = filmStorage.getFilmById(1);
-		assertEquals(5, film.getRate());
+		assertEquals(1, film.getRate());
         likeStorage.removeLike(1,1);
 		film = filmStorage.getFilmById(1);
-		assertEquals(4, film.getRate());
+		assertEquals(0, film.getRate());
 	}
 
 	@Test

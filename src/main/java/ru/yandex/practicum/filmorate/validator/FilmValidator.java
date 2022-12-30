@@ -14,6 +14,8 @@ import java.util.Set;
 @Slf4j
 public class FilmValidator {
 
+    private static final LocalDate EARLIEST_FILM_DATE = LocalDate.of(1895, 12, 28);
+
     public static void validate(Film film) {
         validateName(film);
         validateDescription(film);
@@ -38,7 +40,7 @@ public class FilmValidator {
 
     private static void validateReleaseDate(Film film) {
         if (film.getReleaseDate() == null ||
-                film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+                film.getReleaseDate().isBefore(EARLIEST_FILM_DATE)) {
             log.info("Неверное значение поля releaseDate");
             throw new ValidationException("Дата релиза отсутствует или — раньше 28 декабря 1895 года");
         }

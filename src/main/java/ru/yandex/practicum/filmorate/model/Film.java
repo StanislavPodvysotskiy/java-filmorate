@@ -35,12 +35,6 @@ public class Film {
         genres.add(genre);
     }
 
-    public void setGenreId(Integer id) {
-        Genre genre = new Genre();
-        genre.setId(id);
-        genres.add(genre);
-    }
-
 
     public void setMpaId(Integer id) {
         mpa.setId(id);

@@ -22,20 +22,18 @@ public class LikeStorageDB implements LikeStorage {
     public void addLike(int filmId, int userId) {
         filmCheck(filmId);
         userCheck(userId);
-        String sql1 = "insert into FILM_LIKES (FILM_ID, USER_ID) VALUES (?, ?)";
-        String sql2 = "UPDATE FILMS SET RATE = RATE + 1 WHERE FILM_ID = ?";
-        jdbcTemplate.update(sql1, filmId, userId);
-        jdbcTemplate.update(sql2, filmId);
+        String sql = "insert into FILM_LIKES (FILM_ID, USER_ID) VALUES (?, ?)";
+        jdbcTemplate.update(sql, filmId, userId);
+        updateRate(filmId);
     }
 
     @Override
     public void removeLike(int filmId, int userId) {
         filmCheck(filmId);
         userCheck(userId);
-        String sql1 = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
-        String sql2 = "UPDATE FILMS SET RATE = RATE - 1 WHERE FILM_ID = ?";
-        jdbcTemplate.update(sql1, filmId, userId);
-        jdbcTemplate.update(sql2, filmId);
+        String sql = "DELETE FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
+        jdbcTemplate.update(sql, filmId, userId);
+        updateRate(filmId);
     }
 
     @Override
@@ -60,6 +58,12 @@ public class LikeStorageDB implements LikeStorage {
         if (!rs.next()) {
             throw new NotFoundException("User not found");
         }
+    }
+
+    private void updateRate(long filmId) {
+        String sqlQuery = "update FILMS f set rate = (select count(l.user_id) from FILM_LIKES l " +
+                "where l.film_id = f.film_id)  where film_id = ?";
+        jdbcTemplate.update(sqlQuery, filmId);
     }
 
 }

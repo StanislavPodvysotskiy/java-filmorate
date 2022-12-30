@@ -33,7 +33,7 @@ class FilmValidatorTest {
             FilmValidator.validate(film);;
         });
         String message = exception.getMessage();
-        assertEquals("Описание больше 200 символов", message);
+        assertEquals("Описание отсутствует или больше 200 символов", message);
     }
 
     @Test
@@ -44,7 +44,7 @@ class FilmValidatorTest {
             FilmValidator.validate(film);;
         });
         String message = exception.getMessage();
-        assertEquals("Дата релиза — раньше 28 декабря 1895 года", message);
+        assertEquals("Дата релиза отсутствует или — раньше 28 декабря 1895 года", message);
     }
 
     @Test

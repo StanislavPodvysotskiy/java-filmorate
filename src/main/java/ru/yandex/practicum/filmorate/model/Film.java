@@ -8,7 +8,6 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Film {
 
     private Integer id;

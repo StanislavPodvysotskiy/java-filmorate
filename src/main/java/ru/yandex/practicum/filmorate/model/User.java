@@ -8,9 +8,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@Component
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
 
     private Integer id;

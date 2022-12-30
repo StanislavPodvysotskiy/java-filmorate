@@ -16,7 +16,7 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
 
-    public Collection<User> getAll() {
+    public List<User> getAll() {
         return userStorage.getUsers();
     }
 

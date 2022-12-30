@@ -16,6 +16,7 @@ import java.util.List;
 public class LikeStorageDB implements LikeStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final FilmMapper filmMapper;
 
     @Override
     public void addLike(int filmId, int userId) {
@@ -42,7 +43,7 @@ public class LikeStorageDB implements LikeStorage {
         String sql = "SELECT * FROM FILMS AS F LEFT OUTER JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
                 "LEFT OUTER JOIN FILM_GENRE AS FG ON F.FILM_ID = FG.FILM " +
                 "LEFT OUTER JOIN GENRE AS G ON FG.GENRE = G.GENRE_ID ORDER BY RATE DESC LIMIT ?";
-        return jdbcTemplate.query(sql, new Object[]{count}, new FilmMapper());
+        return jdbcTemplate.query(sql, new Object[]{count}, filmMapper);
     }
 
     private void filmCheck(int filmId) {
@@ -59,11 +60,6 @@ public class LikeStorageDB implements LikeStorage {
         if (!rs.next()) {
             throw new NotFoundException("User not found");
         }
-    }
-
-    private void updateRate(long filmId) {
-        String sqlQuery = "update FILMS f set rate = (select count(l.user_id) from FILM_LIKES l where l.film_id = f.film_id)  where film_id = ?";
-        jdbcTemplate.update(sqlQuery, filmId);
     }
 
 }

@@ -55,7 +55,7 @@ public class UserValidator {
     }
 
     private static void validateBirthday(User user) {
-        if (user.getBirthday().isAfter(LocalDate.now()) || user.getBirthday() == null) {
+        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now())) {
             log.info("Неверное поле birthday");
             throw new ValidationException("Дата рождения не может быть позже текущей даты");
         }

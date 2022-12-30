@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FilmoRateApplicationTests {
-	/*private final UserStorage userStorage;
+	private final UserStorage userStorage;
 	private final FilmStorage filmStorage;
     private final FriendStorage friendStorage;
     private final LikeStorage likeStorage;
@@ -188,6 +188,6 @@ class FilmoRateApplicationTests {
 	public void shouldBeGenreNameComedy() {
 		Genre genre = genreStorage.getGenreById(1);
 		assertEquals("Комедия", genre.getName());
-	}*/
+	}
 
 }

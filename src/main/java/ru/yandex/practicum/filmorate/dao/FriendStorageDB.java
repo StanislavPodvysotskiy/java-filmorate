@@ -16,11 +16,12 @@ import java.util.List;
 public class FriendStorageDB implements FriendStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserMapper userMapper;
 
     @Override
     public List<User> getAllFriends(int id) {
         String sql = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?)";
-        return jdbcTemplate.query(sql, new Object[]{id}, new UserMapper());
+        return jdbcTemplate.query(sql, new Object[]{id}, userMapper);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class FriendStorageDB implements FriendStorage {
         String sql = "INSERT INTO FRIENDS (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, friendId);
         String getUser = "select * from USERS where USER_ID = ?";
-        return jdbcTemplate.query(getUser, new Object[]{userId}, new UserMapper()).get(0);
+        return jdbcTemplate.queryForObject(getUser, new Object[]{userId}, userMapper);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class FriendStorageDB implements FriendStorage {
         String sql = "DELETE FROM FRIENDS WHERE USER_ID = ? AND FRIEND_ID = ?";
         jdbcTemplate.update(sql, userId, friendId);
         String userFriends = "SELECT * FROM USERS WHERE USER_ID IN (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?)";
-        return jdbcTemplate.query(userFriends, new Object[]{userId}, new UserMapper());
+        return jdbcTemplate.query(userFriends, new Object[]{userId}, userMapper);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class FriendStorageDB implements FriendStorage {
         String sql = "SELECT * FROM USERS WHERE USER_ID IN (SELECT DISTINCT F1.FRIEND_ID " +
                 "FROM (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?) AS F1 " +
                 "INNER JOIN (SELECT FRIEND_ID FROM FRIENDS WHERE USER_ID = ?) AS F2 ON F1.FRIEND_ID = F2.FRIEND_ID)";
-        return jdbcTemplate.query(sql, new Object[]{userId, friendId}, new UserMapper());
+        return jdbcTemplate.query(sql, new Object[]{userId, friendId}, userMapper);
     }
 
     private void userCheck(int userId) {

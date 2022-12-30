@@ -16,11 +16,12 @@ import java.util.List;
 public class MpaStorageDB implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final MpaMapper mpaMapper;
 
     @Override
     public List<Mpa> getAllMpa() {
         String sql = "SELECT * FROM MPA";
-        return jdbcTemplate.query(sql, new MpaMapper());
+        return jdbcTemplate.query(sql, mpaMapper);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class MpaStorageDB implements MpaStorage {
         if (!rs.next()) {
             throw new NotFoundException("MPA not found");
         }
-        return jdbcTemplate.query(sql, new Object[]{id}, new MpaMapper()).get(0);
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, mpaMapper);
     }
 
 }

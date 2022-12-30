@@ -16,11 +16,12 @@ import java.util.List;
 public class GenreStorageDB implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final GenreMapper genreMapper;
 
     @Override
     public List<Genre> getAllGenres() {
         String sql = "SELECT * FROM GENRE";
-        return jdbcTemplate.query(sql, new GenreMapper());
+        return jdbcTemplate.query(sql, genreMapper);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class GenreStorageDB implements GenreStorage {
         if (!rs.next()) {
             throw new NotFoundException("GENRE not found");
         }
-        return jdbcTemplate.query(sql, new Object[]{id}, new GenreMapper()).get(0);
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, genreMapper);
     }
 
 }

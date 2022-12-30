@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.dao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -11,41 +13,72 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
 public class FilmStorageDB implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final FilmsMapper filmsMapper;
 
     @Override
     public Collection<Film> getFilms() {
         String sql = "SELECT * FROM FILMS AS F LEFT OUTER JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
                 "LEFT OUTER JOIN FILM_GENRE AS FG ON F.FILM_ID = FG.FILM " +
                 "LEFT OUTER JOIN GENRE AS G ON FG.GENRE = G.GENRE_ID";
-        return jdbcTemplate.query(sql, new FilmsMapper());
+        return jdbcTemplate.query(sql, filmsMapper);
     }
 
     @Override
     public Film getFilmById(int id) {
-        filmCheck(id);
         String sql = "SELECT * FROM FILMS AS F LEFT OUTER JOIN MPA AS M ON F.MPA_ID = M.MPA_ID " +
                 "LEFT OUTER JOIN FILM_GENRE AS FG ON F.FILM_ID = FG.FILM " +
                 "LEFT OUTER JOIN GENRE AS G ON FG.GENRE = G.GENRE_ID WHERE FILM_ID = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, new FilmMapper());
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(sql, id);
+        Film film = new Film();
+        if (rs.next()) {
+            film.setId(rs.getInt("film_id"));
+            film.setName(rs.getString("name"));
+            film.setDescription(rs.getString("description"));
+            film.setReleaseDate(Objects.requireNonNull(rs.getDate("release_date")).toLocalDate());
+            film.setDuration(rs.getInt("duration"));
+            film.setRate(rs.getInt("rate"));
+            film.setMpaId(rs.getInt("mpa_id"));
+            film.setMpaName(rs.getString("mpa_name"));
+            if (rs.getString("genre_name") != null) {
+                film.setGenre(rs.getInt("genre_id"), rs.getString("genre_name"));
+                while (rs.next()) {
+                    film.setGenre(rs.getInt("genre_id"), rs.getString("genre_name"));
+                }
+            }
+        } else {
+            throw new NotFoundException("Film not found");
+        }
+        return film;
     }
 
     @Override
     public Film add(Film film) {
         String sql = "INSERT INTO FILMS (NAME, DESCRIPTION, RELEASE_DATE, DURATION, RATE, MPA_ID) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(),
-                film.getDuration(), film.getRate(), film.getMpa().getId());
-        int id = jdbcTemplate.query("SELECT * FROM FILMS WHERE NAME = ?", new Object[]{film.getName()},
-                new AddFilmMapper()).get(0).getId();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, film.getName());
+            stmt.setString(2, film.getDescription());
+            stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
+            stmt.setInt(4, film.getDuration());
+            stmt.setInt(5, film.getRate());
+            stmt.setInt(6, film.getMpa().getId());
+            return stmt;
+        }, keyHolder);
+        int id = Objects.requireNonNull(keyHolder.getKey()).intValue();
         updateFilmGenre(film, id);
         return getFilmById(id);
     }
